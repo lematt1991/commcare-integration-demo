@@ -33,6 +33,19 @@ class: center, middle
 
 ---
 
+# Materials
+
+### All materials are available on the github page:
+### [https://github.com/ml9951/commcare-integration-demo.git](https://github.com/ml9951/commcare-integration-demo.git)
+
+```bash
+git clone https://github.com/ml9951/commcare-integration-demo.git
+```
+
+- Note: requires Python and PostgreSQL to be installed
+
+---
+
 # Setting up a database
 
 
@@ -46,17 +59,134 @@ createdb commcare
 
 ---
 
+# Commcare Report
+
+- In this demo, we'll be using the `GPS Case Data` report from the `atlas-api-demo` project.
+- [https://www.commcarehq.org/a/atlas-api-demo/dashboard/project/](https://www.commcarehq.org/a/atlas-api-demo/dashboard/project/)
+
+<img src="images/report.png" alt="Drawing" style="width: 100%;"/>
+
+---
+
 # Creating a table
 
-1. In order to properly 
+1. We will initialize our table with an Excel export from the Commcare report builder
+2. Then import the Excel file into PostgreSQL using a simple Python script.
 
+```Python
+# Rename columns to something that is PostgreSQL compliant
+def renameCol(col):
+    col = col.split('/')[-1]
+    return re.sub(' +', '_', col.lower())
 
+if __name__ == '__main__':
+    # Get all .xlsx files
+    for file in glob.glob('data/*.xlsx'): 
+        # Import the file into a Dataframe
+        df = pandas.read_excel(file) 
+        #Create PostgreSQL compliant names
+        df.columns = map(renameCol, df.columns)
+        table_name = renameCol(os.path.splitext(os.path.basename(file))[0])
+        print('Creating %s' % table_name)
+        #Write the dataframe to PostgreSQL
+        df.to_sql(table_name, engine, if_exists='replace', index=False)
+
+```
+
+---
+
+# Saving the schema
+
+- This initial process can be tedious.
+- Save the schema using the `pg_dump` command
+
+```BASH
+pg_dump commcare-demo --schema-only --init.sql
+```
+
+- This will create an SQL script that will recreate all tables in the database.
+
+---
+
+# Keeping your database in sync with Commcare
+
+- When new data gets pushed to Commcare, we would like to automatically update our database
+- The Commcare API provides filters to help with this.
+
+---
+
+# Get the available filters
+
+- We can use the provided Python client to find out what filters are available on our report using the `simplereportconfiguration` endpoint
+
+```Python
+# Get the user's password and create the Commcare client.
+username = input('Enter username: ')
+pw = getpass('Enter password: ')
+
+# Create the client object
+client = Commcare(username, pw, 'atlas-api-demo')
+
+#List reports and save to file
+report = client.listForms()
+json.dump(report, open('reports.json', 'w'), indent=2)
+```
+
+---
+
+# Example `reports.json`
+
+```JSON
+{
+  "meta": {
+    "total_count": 3
+  }, 
+  "objects": [
+    {
+      "title": "GPS Case Data", 
+      "resource_uri": "/a/atlas-api-demo/api/v0.5/simplereportconfiguration/988058bd3248104e3114ecac4b3fc674/", 
+      "filters": [
+        ...
+        {
+          "datatype": "string", 
+          "type": "date", 
+          "slug": "modified_on_6457b79c_2"
+        }
+      ], 
+      "columns": [
+        ...
+      ]
+    }
+  ...
+  ]
+...
+}
+
+```
 
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
     </script>
     <script>
-      var slideshow = remark.create();
+      var slideshow = remark.create({
+        navigation: {
+          scroll: false,
+          touch: false,
+          click: true
+        }
+      });
     </script>
   </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
