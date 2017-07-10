@@ -46,6 +46,16 @@ git clone https://github.com/ml9951/commcare-integration-demo.git
 
 ---
 
+# Commcare API
+
+- The Commcare API Documentation can be found at [https://confluence.dimagi.com/display/commcarepublic/CommCare+HQ+APIs](https://confluence.dimagi.com/display/commcarepublic/CommCare+HQ+APIs)
+
+- The [`simplereportconfiguration`](https://confluence.dimagi.com/display/commcarepublic/List+Reports) endpoint will show all reports that are available for a given project
+
+- The [`configurablereportdata`](https://confluence.dimagi.com/display/commcarepublic/Download+Report+Data) endpoint will allow us to pull data from Commcare
+
+---
+
 # Setting up a database
 
 
@@ -101,7 +111,7 @@ if __name__ == '__main__':
 - Save the schema using the `pg_dump` command
 
 ```BASH
-pg_dump commcare-demo --schema-only --init.sql
+pg_dump commcare-demo --schema-only -f init.sql
 ```
 
 - This will create an SQL script that will recreate all tables in the database.
@@ -164,15 +174,72 @@ json.dump(report, open('reports.json', 'w'), indent=2)
 
 ```
 
+---
+
+# Using filters
+
+- In order to keep our database up to date, we want to only retrieve the new data points through the API.
+- We'll use the `modified_on_6457b79c_2` filter we saw in `reports.json` to do this
+
+- The [`configurablereportdata`](https://confluence.dimagi.com/display/commcarepublic/Download+Report+Data) endpoint documentation contains more info on how to do this.
+
+#### Example:
+
+```Python
+filter = {
+  'modified_on_6457b79c_2-start' : '2017-01-01',
+  'modified_on_6457b79c_2-end' : '2017-07-13'
+}
+```
+
+---
+
+# Updating the database
+
+1. Fetch the newest record in the table
+2. Use that as the `start` date in the range filter
+
+
+#### Example
+
+```Python
+
+from datetime import datetime
+from commcare import Commcare
+import psycopg2
+
+conn = psycopg2.connect(dbname='commcare-demo')
+cursor = conn.cursor()
+
+client = Commcare(username, password, 'atlas-api-demo')
+
+cursor.execute('SELECT MAX(modified_on) FROM gps_case_data')
+start_date, = cursor.fetchone()
+
+# Create the filter
+filter = client.mkDateRange(start_date, datetime.now())
+
+for rows in client.getReport('988058bd3248104e3114ecac4b3fc674', filter=filter):
+  insertRows(rows)
+
+```
+
+---
+
+# Automating the update process
+
+- 
+
+
     </textarea>
-    <script src="https://remarkjs.com/downloads/remark-latest.min.js">
+      <script src="js/remark-latest.min.js">
     </script>
     <script>
       var slideshow = remark.create({
         navigation: {
           scroll: false,
           touch: false,
-          click: true
+          click: false
         }
       });
     </script>
