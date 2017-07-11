@@ -54,3 +54,16 @@ if args.reports:
     json.dump(report, open('reports.json', 'w'), indent=2)
 elif args.update:
 	updateTable()
+
+
+
+
+
+
+
+
+
+
+
+
+	

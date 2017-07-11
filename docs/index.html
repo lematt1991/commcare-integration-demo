@@ -25,14 +25,6 @@ class: center, middle
 
 ---
 
-# Agenda
-
-1. Setup a PostgreSQL database to store data
-2. Retrieve data from the Commcare API
-3. Keep database in sync with Commcare API
-
----
-
 # Materials
 
 ### All materials are available on the github page:
@@ -43,6 +35,17 @@ git clone https://github.com/ml9951/commcare-integration-demo.git
 ```
 
 - Note: requires Python and PostgreSQL to be installed
+
+
+---
+
+# Agenda
+
+1. Setup a PostgreSQL database to store data
+2. Retrieve data from the Commcare API
+3. Keep database in sync with Commcare API
+4. Setup PostGIS extension
+
 
 ---
 
@@ -64,7 +67,14 @@ git clone https://github.com/ml9951/commcare-integration-demo.git
   - PostgreSQL is open source and has some handy extensions for working with spatial data
 
 ```BASH
-createdb commcare
+createdb commcare-demo
+```
+
+2. Add the [PostGIS](http://postgis.net/) extension
+  - PostGIS provides spatial datatypes and functions that we'll use later
+
+```BASH
+psql commcare-demo -c "CREATE EXTENSION postgis;"
 ```
 
 ---
@@ -241,7 +251,19 @@ for rows in client.getReport('988058bd3248104e3114ecac4b3fc674', filter=filter):
 
 # AWS Lambda
 
-- Upload a single function to be run when an even is triggered
+- AWS Lambda is a platform for running "microservices"
+
+- Currently supports Python, Node.js, Java, and C#
+
+- Users upload a zip file containing a file with a single function along with some configuration files
+
+- Amazon takes care of provisioning and scaling servers
+
+---
+
+# AWS Lambda
+
+- Upload a single function to be run when an event is triggered
 
 - Events can include:
   - Scheduled Events

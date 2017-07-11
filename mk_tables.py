@@ -21,6 +21,8 @@ if __name__ == '__main__':
         #Create PostgreSQL compliant names
         df.columns = map(renameCol, df.columns)
         table_name = renameCol(os.path.splitext(os.path.basename(file))[0])
+        #Convert `modified_on` from string to datetime object
+        df['modified_on'] = pandas.to_datetime(df['modified_on'])
         print('Creating %s' % table_name)
         #Write the dataframe to PostgreSQL
         df.to_sql(table_name, engine, if_exists='replace', index=False)
