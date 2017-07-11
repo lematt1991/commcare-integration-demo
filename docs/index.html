@@ -228,7 +228,78 @@ for rows in client.getReport('988058bd3248104e3114ecac4b3fc674', filter=filter):
 
 # Automating the update process
 
-- 
+<div style="display: flex; align-items: center" >
+  <img src="images/serverless.png"/>
+  <img src="images/aws-lambda.png"/>
+</div>
+
+
+- The serverless architecture is an ideal framework for automating this process
+- Host code without managing or provisioning servers
+
+---
+
+# AWS Lambda
+
+- Upload a single function to be run when an even is triggered
+
+- Events can include:
+  - Scheduled Events
+  - API Gateway requests
+  - Many others...
+
+```Python
+
+from demo import updateTable
+
+def handler_name(event, context): 
+    updateTable()
+    return {'message' : 'Success'}
+```
+
+- Schedule the lambda function to execute on a given interval (Ex: 5 min.)
+
+---
+
+# Serverless
+
+- [Many frameworks](https://github.com/anaibol/awesome-serverless#frameworks) exist for abstracting providers
+
+- The aim is to be able to run your functions on multiple platforms (Ex: AWS, Google Cloud, Azure, etc.)
+
+---
+
+# PostGIS
+
+- PostGIS is a PostgreSQL extension that adds spatial datatypes and functions.
+
+- Data can now be represented as a spatial geometry (Point, Line, Polygon, etc.)
+
+
+```
+POLYGON((
+  -90.582275390625 14.7084781979703,
+  -90.6591796875 14.6168070828727,
+  -90.5630493164062 14.4599476324892,
+  -90.3680419921875 14.5144622637317,
+  -90.3611755371094 14.6672973726158,
+  -90.4710388183594 14.7523073141749,
+  -90.582275390625 14.7084781979703
+))
+```
+
+<img src="images/gtm_city.png" style="position:relative; transform: translate(95%, -75%); " />
+
+
+---
+
+# Spatial Indexing
+
+- One of the primary benefits of PostGIS is the use of spatial indexing
+- Spatial indexes substantially improve performance of spatial queries
+
+.center[![](images/rtree.png)]
+
 
 
     </textarea>
