@@ -20,31 +20,29 @@ client = Commcare('matthew.le@mssm.edu', pw, 'atlas-api-demo')
 
 def updateTable():
 	# Fetch the neweset dates
-	cursor.execute('SELECT MAX(modified_on) FROM gps_case_data')
+	cursor.execute('SELECT MAX(date_last_modified_on) FROM gps_case_data')
 	start_date, = cursor.fetchone()
 	date_filter = None
 	if start_date is not None:
-		date_filter = client.mkDateRange(start_date, datetime.now(), 'modified_on_6457b79c_2')
+		date_filter = client.mkDateRange(start_date, datetime.now(), 'date_last_modified_on_c2da5c2f_2')
 
-	for rows in client.getReport('988058bd3248104e3114ecac4b3fc674', filter=date_filter):
+	for rows in client.getReport('b5471e313ab7f16adaa2889cd9d78e54', filter=date_filter):
 		cursor.executemany("""
 			INSERT INTO gps_case_data(
 				name, 
-				gps,
 				latitude, 
 				longitude, 
 				altitude, 
-				precision, 
-				modified_on
+				date_last_modified_on,
+				owner_id
 			)
 			VALUES (
 				%(name)s,
-				%(gps)s,
 				%(latitude)s,
 				%(longitude)s,
 				%(altitude)s,
-				%(precision)s,
-				%(modified_on)s
+				%(date_last_modified_on)s,
+				%(owner_id)s
 			)
 		""", rows)
 	conn.commit()

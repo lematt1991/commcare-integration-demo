@@ -23,7 +23,7 @@ class Commcare:
         self.session = requests.Session()
         self.session.auth = (username, password)
 
-    def mkDateRange(self, filter_name, begin, end):
+    def mkDateRange(self, begin, end, filter_name):
         return {
             '%s-start' % filter_name : str(begin).split(' ')[0],
             '%s-end' % filter_name : str(end).split(' ')[0]
